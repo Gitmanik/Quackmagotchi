@@ -46,6 +46,8 @@ extern "C" {
 
 extern pcd8544_config_t pcd8544_handle;
 
+extern ADC_HandleTypeDef hadc1;
+
 extern bool button1_clicked;
 extern bool button2_clicked;
 extern bool button3_clicked;
@@ -73,6 +75,8 @@ void Error_Handler(void);
 #define SPI_DC_GPIO_Port GPIOC
 #define SPI_SS_Pin GPIO_PIN_1
 #define SPI_SS_GPIO_Port GPIOC
+#define BAT_IN_Pin GPIO_PIN_4
+#define BAT_IN_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
 #define BUTTON1_Pin GPIO_PIN_4

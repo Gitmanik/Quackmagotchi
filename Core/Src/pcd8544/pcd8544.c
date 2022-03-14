@@ -1,5 +1,6 @@
 #include "../pcd8544/pcd8544.h"
 #include "fonts/font_default_5x8.h"
+#include "fonts/font_tiny_3x8.h"
 
 
 #include <assert.h>
@@ -205,12 +206,13 @@ void PCD8544_DrawLine(pcd8544_config_t *handle, uint8_t x1, uint8_t y1, uint8_t 
 	}
 }
 
+//todo obsluga fontuw
 void PCD8544_WriteString(pcd8544_config_t *handle, uint8_t x, uint8_t y, char* str, uint8_t color)
 {
 	while (*str)
 	{
 		PCD8544_WriteChar(handle, x, y, *str++, color);
-		x += 5 + 1;
+		x += 3 + 1;
 		if (x + 5 > PCD8544_LCD_WIDTH - 1)
 		{
 			y += 9;
@@ -222,12 +224,12 @@ void PCD8544_WriteString(pcd8544_config_t *handle, uint8_t x, uint8_t y, char* s
 void PCD8544_WriteChar(pcd8544_config_t *handle, uint8_t x, uint8_t y, char ch, uint8_t color)
 {
 	uint8_t zz = (uint8_t) ch - 0x20;
-	for (uint8_t width = 0; width < 5; width++)
+	for (uint8_t width = 0; width < 3; width++)
 	{
 		for (uint8_t height = 0; height < 8; height++)
 		{
 			uint8_t c = 0;
-			if ((FONT_Default5x8[zz][width] >> height) & 1)
+			if ((FONT_Tiny3x8[zz][width] >> height) & 1)
 				c = color;
 			else
 				c = !color;

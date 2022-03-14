@@ -14,10 +14,14 @@ typedef enum {
 	IDLE, // Base state
 	REDRAW_IDLE, // Draws over existing buffer DO NOT SET - IT WILL BE SET AUTOMATICALLY BY SETSTATE
 	QUACK, // Draws over existing buffer
-	DEBUG_SCREEN // Clears buffer
+	DEBUG_SCREEN, // Clears buffer,
+	MENU
 
 } game_state_t;
 
+
+extern int8_t STATE_food, STATE_happiness, STATE_energy;
+extern uint32_t battery_volt;
 
 void STATE_Init();
 void STATE_Tick();
@@ -28,4 +32,4 @@ void STATE_SetState(game_state_t new_state);
 game_state_t STATE_GetState();
 void STATE_QueueState(game_state_t q_state);
 
-void STATE_AddFood(int8_t val);
+void STATE_Add(int8_t *stat, int8_t val);
