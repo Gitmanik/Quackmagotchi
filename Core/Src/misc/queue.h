@@ -10,7 +10,6 @@
 #define QUEUE_MAX_ITEMS 16
 
 #include <stdio.h>
-#include <stdbool.h>
 
 typedef struct {
 
@@ -24,7 +23,7 @@ typedef struct {
 void QUEUE_Init(queue_t* queue);
 void QUEUE_insert(queue_t* queue, uint8_t data);
 int QUEUE_peek(queue_t* queue);
-bool QUEUE_isEmpty(queue_t* queue);
-bool QUEUE_isFull(queue_t* queue);
+uint8_t QUEUE_isEmpty(queue_t* queue);
+uint8_t QUEUE_isFull(queue_t* queue);
 int QUEUE_size(queue_t* queue);
 int QUEUE_get(queue_t* queue);

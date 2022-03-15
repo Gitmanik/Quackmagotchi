@@ -56,7 +56,7 @@ void RENDER_DrawStat(pcd8544_config_t* lcd, uint8_t idx, unsigned char* image, u
 	}
 }
 
-uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay, uint8_t *func())
+uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay, uint8_t (*func) ())
 {
 	for (uint8_t idx = 0; idx < len; idx++) {
 		RENDER_DrawDuck(lcd, (unsigned char*) anim[idx]);
@@ -77,8 +77,8 @@ void _RENDER_DebugValue(pcd8544_config_t* lcd, char *str, unsigned int val, uint
 	memset(buf, 0, 16);
 	utoa(val, buf, 10);
 
-	PCD8544_WriteString(lcd, 0, idx * 9, str, 1);
-	PCD8544_WriteString(lcd, strlen(str) * 6, idx * 9, buf, 1);
+	PCD8544_WriteString(lcd, 0, idx * 6, str, 1);
+	PCD8544_WriteString(lcd, strlen(str) * 4, idx * 6, buf, 1);
 }
 
 void RENDER_RenderDebugScreen(pcd8544_config_t* lcd)
@@ -88,4 +88,15 @@ void RENDER_RenderDebugScreen(pcd8544_config_t* lcd)
 	_RENDER_DebugValue(lcd, "bat mV:", battery_volt, 2);
 	_RENDER_DebugValue(lcd, "energy:", STATE_energy, 3);
 //	_RENDER_DebugValue(lcd, "tick:", HAL_GetTick(), 4);
+}
+
+void RENDER_RenderMenu(pcd8544_config_t* lcd, menu_t *menu, uint8_t pos)
+{
+	for (int menu_idx = 0; menu_idx < menu->menu_length; menu_idx++) {
+		if (menu_idx == pos) {
+			PCD8544_WriteString(lcd, 0, menu_idx * 6, "> ", 1);
+			PCD8544_WriteString(lcd, 4 * strlen( menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx), menu_idx * 6, " <", 1);
+		}
+		PCD8544_WriteString(lcd, pos == menu_idx ? 4 : 0, menu_idx * 6, menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx, 1);
+	}
 }

@@ -24,3 +24,4 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
 uint8_t INPUT_Get_Button(buttons_t button);
 void INPUT_ClearInputs();
+uint8_t INPUT_TestButton1();

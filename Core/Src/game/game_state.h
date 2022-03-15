@@ -27,7 +27,7 @@ void STATE_Init();
 void STATE_Tick();
 void STATE_TimerTick();
 
-uint8_t STATE_Delay(uint32_t Delay, uint8_t *func());
+uint8_t STATE_Delay(uint32_t Delay, uint8_t (*func) ());
 
 void STATE_SetState(game_state_t new_state);
 game_state_t STATE_GetState();

@@ -22,7 +22,6 @@ extern const unsigned char BITMAP_food[];
 extern const unsigned char BITMAP_energy[];
 extern const unsigned char BITMAP_happiness[];
 
-//todo: wydzielic do menu.c/menu.h
 typedef void (*MENU_OnClick) (pcd8544_config_t*);
 typedef struct {
 	char* menu_entries;
@@ -32,8 +31,9 @@ typedef struct {
 
 void RENDER_DrawStat(pcd8544_config_t* lcd, uint8_t idx, unsigned char* image, uint8_t val);
 void RENDER_DrawDuck(pcd8544_config_t* lcd, unsigned char* image);
-uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay, uint8_t *func());
+uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay, uint8_t (*func) ());
 
 void RENDER_RenderDebugScreen(pcd8544_config_t* lcd);
+void RENDER_RenderMenu(pcd8544_config_t* lcd, menu_t *menu, uint8_t pos);
 
 void RENDER_Init();

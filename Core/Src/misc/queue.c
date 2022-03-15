@@ -8,7 +8,6 @@
 //https://www.tutorialspoint.com/data_structures_algorithms/queue_program_in_c.htm
 
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "queue.h"
 
@@ -23,11 +22,11 @@ int QUEUE_peek(queue_t* queue) {
    return queue->q[queue->front];
 }
 
-bool QUEUE_isEmpty(queue_t* queue) {
+uint8_t QUEUE_isEmpty(queue_t* queue) {
    return queue->itemCount == 0;
 }
 
-bool QUEUE_isFull(queue_t* queue) {
+uint8_t QUEUE_isFull(queue_t* queue) {
    return queue->itemCount == QUEUE_MAX_ITEMS;
 }
 

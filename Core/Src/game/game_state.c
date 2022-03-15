@@ -21,39 +21,29 @@
 #include "../../Inc/main.h"
 
 static queue_t queue;
-uint8_t menu_pos;
-
 static game_state_t STATE_state;
+static uint8_t menu_pos;
 
 int8_t STATE_food, STATE_energy, STATE_happiness; //min: 0, max: 100
 uint32_t battery_volt;
 uint32_t last_idle_anim = 0, last_food = 0, last_bat = 0, menu_entered = 0;
 
-void Handle_Statistics();
+void _STATE_HandleStatistics();
 
-//todo wydzielic delaye gdzies indziej
-uint8_t testbutton1()
-{
-	return !INPUT_Get_Button(Button1);
-}
-uint8_t one()
+uint8_t _STATE_MockTest()
 {
 	return 1;
 }
 
-//todo: wydzielic menu
-#define DLUGOSC_GOWNA 3
-char menu[][MENU_ENTRY_LENGTH] = {
+#if 1 /* Menu glowne*/
+#define DLUGOSC_MENU_GLOWNEGO 2
+char menu_glowne_tekst[][MENU_ENTRY_LENGTH] = {
 		"Nakarm\0         ",
-		"Kwak\0           ",
 		"Debugowanie\0    "
 };
 
-void MENU_OnClick_Kwak(pcd8544_config_t *lcd) {
-	STATE_QueueState(QUACK);
-}
 void MENU_OnClick_Nakarm(pcd8544_config_t *lcd) {
-	STATE_AddToStat(&STATE_food, 10);
+	STATE_AddToStat(&STATE_food, 35);
 	last_idle_anim = HAL_GetTick();
 	STATE_QueueState(IDLE);
 }
@@ -63,10 +53,28 @@ void MENU_OnClick_Debugowanie(pcd8544_config_t* lcd)
 	STATE_QueueState(DEBUG_SCREEN);
 }
 
-MENU_OnClick menu_cbks[DLUGOSC_GOWNA] = { MENU_OnClick_Nakarm, MENU_OnClick_Kwak, MENU_OnClick_Debugowanie };
+MENU_OnClick menu_glowne_callbacki[DLUGOSC_MENU_GLOWNEGO] = { MENU_OnClick_Nakarm, MENU_OnClick_Debugowanie };
+menu_t menu_glowne;
+#endif
 
+uint8_t STATE_Delay(uint32_t Delay, uint8_t (*func) ()) {
 
-menu_t gowno;
+	uint32_t tickstart = HAL_GetTick();
+	uint32_t wait = Delay;
+
+	/* Add a period to guarantee minimum wait */
+	if (wait < HAL_MAX_DELAY) {
+		wait += (uint32_t) uwTickFreq;
+	}
+
+	while ((HAL_GetTick() - tickstart) < wait) {
+		if (!func())
+			return 0;
+
+		__WFI();
+	}
+	return 1;
+}
 
 void STATE_Init() {
 	STATE_state = REDRAW_IDLE;
@@ -75,14 +83,14 @@ void STATE_Init() {
 	STATE_happiness = 50;
 	QUEUE_Init(&queue);
 
-	gowno.menu_entries = (char*) &menu;
-	gowno.menu_callbacks = (MENU_OnClick*) &menu_cbks;
-	gowno.menu_length = DLUGOSC_GOWNA;
+	menu_glowne.menu_entries = (char*) &menu_glowne_tekst;
+	menu_glowne.menu_callbacks = (MENU_OnClick*) &menu_glowne_callbacki;
+	menu_glowne.menu_length = DLUGOSC_MENU_GLOWNEGO;
 }
 
 void STATE_Tick() {
 
-	Handle_Statistics();
+	_STATE_HandleStatistics();
 
 	if (!QUEUE_isEmpty(&queue)) {
 		game_state_t new_state = QUEUE_get(&queue);
@@ -94,7 +102,7 @@ void STATE_Tick() {
 	}
 
 	if (STATE_state == QUACK) {
-		if (!RENDER_Animate(&pcd8544_handle, ANIM_Quack, 3, 150, testbutton1))
+		if (!RENDER_Animate(&pcd8544_handle, ANIM_Quack, 3, 150, INPUT_TestButton1))
 			STATE_QueueState(MENU);
 		else
 			STATE_QueueState(IDLE);
@@ -123,9 +131,9 @@ void STATE_Tick() {
 		if (HAL_GetTick() - last_idle_anim > 10000) {
 
 			if (rand() % 2 == 0)
-				RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, one);
+				RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, _STATE_MockTest);
 			else
-				RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, one);
+				RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, _STATE_MockTest);
 
 			last_idle_anim = HAL_GetTick();
 		}
@@ -151,30 +159,25 @@ void STATE_Tick() {
 
 		PCD8544_UpdateScreen(&pcd8544_handle);
 
-		if (!STATE_Delay(100, testbutton1)) {
+		if (!STATE_Delay(100, INPUT_TestButton1)) {
 			STATE_QueueState(IDLE);
 		}
 	}
 
 	if (STATE_state == MENU) {
+
 		PCD8544_ClearBuffer(&pcd8544_handle);
 
-		for (int menu_idx = 0; menu_idx < gowno.menu_length; menu_idx++) {
-			if (menu_idx == menu_pos) {
-				PCD8544_WriteString(&pcd8544_handle, 0, menu_idx * 6, "> ", 1);
-				PCD8544_WriteString(&pcd8544_handle, 4 * strlen( gowno.menu_entries + MENU_ENTRY_LENGTH * menu_idx), menu_idx * 6, " <", 1);
-			}
-			PCD8544_WriteString(&pcd8544_handle, menu_pos == menu_idx ? 4 : 0, menu_idx * 6, gowno.menu_entries + MENU_ENTRY_LENGTH * menu_idx, 1);
-		}
+		RENDER_RenderMenu(&pcd8544_handle, &menu_glowne, menu_pos);
 
 		PCD8544_UpdateScreen(&pcd8544_handle);
 
 		if (INPUT_Get_Button(Button1)) {
-			gowno.menu_callbacks[menu_pos](&pcd8544_handle);
+			menu_glowne.menu_callbacks[menu_pos](&pcd8544_handle);
 		}
 
 		if (INPUT_Get_Button(Button2)) {
-			if (menu_pos < gowno.menu_length - 1)
+			if (menu_pos < menu_glowne.menu_length - 1)
 				menu_pos++;
 		}
 		if (INPUT_Get_Button(Button3)) {
@@ -184,29 +187,9 @@ void STATE_Tick() {
 	}
 }
 
-uint8_t STATE_Delay(uint32_t Delay, uint8_t *func()) {
-
-	uint32_t tickstart = HAL_GetTick();
-	uint32_t wait = Delay;
-
-	/* Add a period to guarantee minimum wait */
-	if (wait < HAL_MAX_DELAY) {
-		wait += (uint32_t) uwTickFreq;
-	}
-
-	while ((HAL_GetTick() - tickstart) < wait) {
-		if (!func())
-			return 0;
-
-		__WFI();
-	}
-	return 1;
-}
-
-
 #if 1 /* Zarzadzanie statystykami */
 
-void Handle_Statistics() {
+void _STATE_HandleStatistics() {
 
 	uint32_t tick = HAL_GetTick();
 	if (tick - last_food > 15000) {

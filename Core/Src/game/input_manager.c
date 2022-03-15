@@ -91,3 +91,8 @@ void INPUT_ClearInputs()
 {
 	button1_state = button2_state = button3_state = 0;
 }
+
+uint8_t INPUT_TestButton1()
+{
+	return !INPUT_Get_Button(Button1);
+}
