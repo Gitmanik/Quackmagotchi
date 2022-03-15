@@ -56,13 +56,15 @@ void RENDER_DrawStat(pcd8544_config_t* lcd, uint8_t idx, unsigned char* image, u
 	}
 }
 
-void RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay)
+uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t delay, uint8_t *func())
 {
 	for (uint8_t idx = 0; idx < len; idx++) {
 		RENDER_DrawDuck(lcd, (unsigned char*) anim[idx]);
 		PCD8544_UpdateScreen(lcd);
-		HAL_Delay(delay);
+		if (!STATE_Delay(delay, func))
+			return 0;
 	}
+	return 1;
 }
 
 void RENDER_DrawDuck(pcd8544_config_t* lcd, unsigned char* image)

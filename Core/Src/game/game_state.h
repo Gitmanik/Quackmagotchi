@@ -11,10 +11,10 @@
 
 typedef enum {
 
-	IDLE, // Base state
-	REDRAW_IDLE, // Draws over existing buffer DO NOT SET - IT WILL BE SET AUTOMATICALLY BY SETSTATE
-	QUACK, // Draws over existing buffer
-	DEBUG_SCREEN, // Clears buffer,
+	IDLE,
+	REDRAW_IDLE,
+	QUACK,
+	DEBUG_SCREEN,
 	MENU
 
 } game_state_t;
@@ -27,9 +27,10 @@ void STATE_Init();
 void STATE_Tick();
 void STATE_TimerTick();
 
+uint8_t STATE_Delay(uint32_t Delay, uint8_t *func());
 
 void STATE_SetState(game_state_t new_state);
 game_state_t STATE_GetState();
 void STATE_QueueState(game_state_t q_state);
 
-void STATE_Add(int8_t *stat, int8_t val);
+void STATE_AddToStat(int8_t *stat, int8_t val);

@@ -24,7 +24,6 @@
 
 #include <string.h>
 #include <stdio.h>
-#include <stdbool.h>
 
 #include "pcd8544/pcd8544.h"
 
@@ -73,64 +72,6 @@ static void MX_ADC1_Init(void);
 /* USER CODE BEGIN 0 */
 
 pcd8544_config_t pcd8544_handle;
-
-/* DEBOUNCING */
-#define DEBOUNCE_DELAY 20
-
-uint8_t button1_state = 0;
-unsigned long button1_tmr;
-uint8_t button2_state = 0;
-unsigned long button2_tmr;
-uint8_t button3_state = 0;
-unsigned long button3_tmr;
-
-bool button1_clicked = 0;
-bool button2_clicked = 0;
-bool button3_clicked = 0;
-
-void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-	unsigned long tick = HAL_GetTick();
-	if (GPIO_Pin == BUTTON1_Pin) {
-		uint8_t new_state = HAL_GPIO_ReadPin(BUTTON1_GPIO_Port, BUTTON1_Pin);
-		if (new_state != button1_state) {
-			if (new_state == 1) {
-				if (tick - button1_tmr > DEBOUNCE_DELAY) {
-					button1_clicked = true;
-				}
-			}
-			button1_state = new_state;
-			button1_tmr = tick;
-		}
-
-	}
-
-	if (GPIO_Pin == BUTTON2_Pin) {
-		uint8_t new_state = HAL_GPIO_ReadPin(BUTTON2_GPIO_Port, BUTTON2_Pin);
-		if (new_state != button2_state) {
-			if (new_state == 1) {
-				if (tick - button2_tmr > DEBOUNCE_DELAY) {
-					button2_clicked = true;
-				}
-			}
-
-			button2_state = new_state;
-			button2_tmr = tick;
-		}
-	}
-
-	if (GPIO_Pin == BUTTON3_Pin) {
-		uint8_t new_state = HAL_GPIO_ReadPin(BUTTON3_GPIO_Port, BUTTON3_Pin);
-		if (new_state != button3_state) {
-			if (new_state == 1) {
-				if (tick - button3_tmr > DEBOUNCE_DELAY) {
-					button3_clicked = true;
-				}
-			}
-			button3_state = new_state;
-			button3_tmr = tick;
-		}
-	}
-}
 
 void HAL_Delay(uint32_t Delay) {
 	uint32_t tickstart = HAL_GetTick();

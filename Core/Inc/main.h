@@ -33,7 +33,6 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include "../Src/pcd8544/pcd8544.h"
-#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -45,14 +44,7 @@ extern "C" {
 /* USER CODE BEGIN EC */
 
 extern pcd8544_config_t pcd8544_handle;
-
 extern ADC_HandleTypeDef hadc1;
-
-extern bool button1_clicked;
-extern bool button2_clicked;
-extern bool button3_clicked;
-
-//extern TIM_HandleTypeDef htim10;
 
 /* USER CODE END EC */
 
