@@ -11,6 +11,12 @@
 #ifndef FONT_DEFAULT_5X8_H
 #define FONT_DEFAULT_5X8_H
 
+#ifdef PCD8544_FONT
+#error Multiple fonts not allowed for the moment
+#endif
+
+#define PCD8544_FONT
+
 const unsigned char FONT_Default5x8[][5]  = {
 {0x00, 0x00, 0x00, 0x00, 0x00} // 20
 ,{0x00, 0x00, 0x5f, 0x00, 0x00} // 21 ! 

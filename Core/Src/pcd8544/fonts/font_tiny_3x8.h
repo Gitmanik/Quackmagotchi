@@ -9,6 +9,12 @@
 #ifndef NOKIA5110_TEXT_FONT_SIX_H
 #define NOKIA5110_TEXT_FONT_SIX_H
 
+#ifdef PCD8544_FONT
+#error Multiple fonts not allowed for the moment
+#endif
+
+#define PCD8544_FONT
+
 const unsigned char FONT_Tiny3x8[][3] = {
 	{0x00,0x00,0x00}, //
 	{0x00,0x2e,0x00}, // !

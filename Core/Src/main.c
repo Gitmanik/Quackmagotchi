@@ -124,13 +124,12 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
-	RENDER_Init();
-	STATE_Init();
-
 	HAL_ADC_Start(&hadc1);
 	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 	fast_srand(HAL_ADC_GetValue(&hadc1));
 	HAL_ADC_Stop(&hadc1);
+
+	STATE_Init();
 
 #ifdef HAL_UART_MODULE_ENABLED
   DEBUG_UART_Init(&huart2, &DEBUG_UART_Handler);

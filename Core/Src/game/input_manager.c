@@ -87,7 +87,7 @@ uint8_t INPUT_Get_Button(buttons_t button) {
 	}
 	return ret;
 }
-void INPUT_ClearInputs()
+void INPUT_Clear_Buttons()
 {
 	button1_state = button2_state = button3_state = 0;
 }
