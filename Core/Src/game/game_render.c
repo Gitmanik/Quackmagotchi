@@ -1,3 +1,10 @@
+/*
+ * game_render.c
+ *
+ *  Created on: Mar 4, 2022
+ *      Author: Gitmanik
+ */
+
 #include <string.h>
 #include <stdlib.h>
 #include "game_render.h"
@@ -36,23 +43,20 @@ void RENDER_Init()
 
 void RENDER_DrawStat(pcd8544_config_t* lcd, uint8_t idx, unsigned char* image, uint8_t val)
 {
-	uint8_t width = 11;
-	uint8_t height = 10;
+	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - STAT_BITMAP_WIDTH - 1, (STAT_BITMAP_HEIGHT+1) * (idx), (PCD8544_LCD_WIDTH - 1), (STAT_BITMAP_HEIGHT+1) * (idx), 1);
+	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - STAT_BITMAP_WIDTH - 1, (STAT_BITMAP_HEIGHT+1) * (idx+1), (PCD8544_LCD_WIDTH - 1), (STAT_BITMAP_HEIGHT+1) * (idx+1), 1);
 
-	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - width - 1, (height+1) * (idx), (PCD8544_LCD_WIDTH - 1), (height+1) * (idx), 1);
-	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - width - 1, (height+1) * (idx+1), (PCD8544_LCD_WIDTH - 1), (height+1) * (idx+1), 1);
+	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - STAT_BITMAP_WIDTH - 1, (STAT_BITMAP_HEIGHT + 1) * idx, (PCD8544_LCD_WIDTH - 1) - STAT_BITMAP_WIDTH - 1, (STAT_BITMAP_HEIGHT + 1) * (idx + 1), 1);
+	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1), (STAT_BITMAP_HEIGHT + 1) * idx, (PCD8544_LCD_WIDTH - 1), (STAT_BITMAP_HEIGHT + 1) * (idx + 1), 1);
 
-	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1) - width - 1, (height + 1) * idx, (PCD8544_LCD_WIDTH - 1) - width - 1, (height + 1) * (idx + 1), 1);
-	PCD8544_DrawLine(lcd, (PCD8544_LCD_WIDTH - 1), (height + 1) * idx, (PCD8544_LCD_WIDTH - 1), (height + 1) * (idx + 1), 1);
-
-	for (uint8_t x_idx = 0; x_idx < width; x_idx++)
+	for (uint8_t x_idx = 0; x_idx < STAT_BITMAP_WIDTH; x_idx++)
 	{
-		for (uint8_t y_idx = 0; y_idx < height; y_idx++)
+		for (uint8_t y_idx = 0; y_idx < STAT_BITMAP_HEIGHT; y_idx++)
 		{
-			uint8_t bit = (image[x_idx + (y_idx / 8) * width] >> y_idx % 8) & 1;
+			uint8_t bit = (image[x_idx + (y_idx / 8) * STAT_BITMAP_WIDTH] >> y_idx % 8) & 1;
 
-			float war = round((float) (1+y_idx) / (float) (1+height) * 100.0) / 100.0;
-			PCD8544_SetPixel(lcd, 83-width + x_idx, 1 * (idx+1) + height*idx + y_idx, 1 - war > (float) val / 100.0 ? bit : !bit);
+			float war = round((float) (1+y_idx) / (float) (1+STAT_BITMAP_HEIGHT) * 100.0) / 100.0;
+			PCD8544_SetPixel(lcd, 83-STAT_BITMAP_WIDTH + x_idx, 1 * (idx+1) + STAT_BITMAP_HEIGHT*idx + y_idx, 1 - war > (float) val / 100.0 ? bit : !bit);
 		}
 	}
 }
@@ -70,7 +74,7 @@ uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t de
 
 void RENDER_DrawDuck(pcd8544_config_t* lcd, unsigned char* image)
 {
-	PCD8544_DrawImage(lcd, 10, 1, 44, 44, image);
+	PCD8544_DrawImage(lcd, 10, 1, DUCK_BITMAP_WIDTH, DUCK_BITMAP_HEIGHT, image);
 }
 
 void _RENDER_DebugValue(pcd8544_config_t* lcd, char *str, unsigned int val, uint8_t idx) {
@@ -93,10 +97,15 @@ void RENDER_RenderDebugScreen(pcd8544_config_t* lcd)
 void RENDER_RenderMenu(pcd8544_config_t* lcd, menu_t *menu, uint8_t pos)
 {
 	for (int menu_idx = 0; menu_idx < menu->menu_length; menu_idx++) {
+
+		char* menu_str = menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx;
+		uint8_t yPos = PCD8544_LCD_HEIGHT/2 - (menu->menu_length) * (PCD8544_FONT_HEIGHT + 1) / 2 + (menu_idx) * (PCD8544_FONT_HEIGHT + 1);
+		uint8_t xPos = PCD8544_LCD_WIDTH/2 - (strlen(menu_str) + (menu_idx == pos ? 4 : 0)) * (PCD8544_FONT_WIDTH + 1) /2;
+
 		if (menu_idx == pos) {
-			PCD8544_WriteString(lcd, 0, menu_idx * (PCD8544_FONT_HEIGHT + 1), "> ", 1);
-			PCD8544_WriteString(lcd, (PCD8544_FONT_WIDTH + 1) * strlen( menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx), menu_idx *  (PCD8544_FONT_HEIGHT + 1), " <", 1);
+			PCD8544_WriteString(lcd, xPos, yPos, "> ", 1);
+			PCD8544_WriteString(lcd, xPos + (PCD8544_FONT_WIDTH + 1) * (strlen(menu_str) + 2), yPos, " <", 1);
 		}
-		PCD8544_WriteString(lcd, pos == menu_idx ? (PCD8544_FONT_WIDTH + 1) : 0, menu_idx *  (PCD8544_FONT_HEIGHT + 1), menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx, 1);
+		PCD8544_WriteString(lcd, xPos + (pos == menu_idx ? (PCD8544_FONT_WIDTH + 1) * 2 : 0), yPos, menu->menu_entries + MENU_ENTRY_LENGTH * menu_idx, 1);
 	}
 }

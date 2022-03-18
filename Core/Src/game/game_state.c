@@ -40,7 +40,7 @@ uint8_t _STATE_MockTest()
 char menu_glowne_tekst[][MENU_ENTRY_LENGTH] = {
 		"Nakarm\0         ",
 		"Debugowanie\0    ",
-		"Powrot\0"
+		"Potwur\0"
 };
 
 void MENU_OnClick_Nakarm(pcd8544_config_t *lcd) {

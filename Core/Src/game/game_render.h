@@ -8,6 +8,12 @@
 #pragma once
 #define MENU_ENTRY_LENGTH 16
 
+#define STAT_BITMAP_WIDTH 11
+#define STAT_BITMAP_HEIGHT 10
+
+#define DUCK_BITMAP_WIDTH 44
+#define DUCK_BITMAP_HEIGHT 44
+
 #include <math.h>
 #include "game_state.h"
 #include "../pcd8544/pcd8544.h"
