@@ -129,12 +129,22 @@ void STATE_Tick() {
 	}
 
 	if (STATE_state == IDLE) {
-		if (HAL_GetTick() - last_idle_anim > 10000) {
+		if (HAL_GetTick() - last_idle_anim > 2000) {
 
-			if (rand() % 2 == 0)
-				RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, _STATE_MockTest);
+			if (rand() % 2 == 0 || 1)
+			{
+				if (!RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, INPUT_TestButton1))
+				{
+					STATE_QueueState(MENU);
+				}
+			}
 			else
-				RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, _STATE_MockTest);
+			{
+				if (!RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, INPUT_TestButton1))
+				{
+					STATE_QueueState(MENU);
+				}
+			}
 
 			RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_base);
 			PCD8544_UpdateScreen(&pcd8544_handle);
@@ -143,8 +153,6 @@ void STATE_Tick() {
 		}
 
 		if (INPUT_Get_Button(Button1)) {
-			menu_pos = 0;
-			menu_entered = HAL_GetTick();
 			STATE_QueueState(MENU);
 		}
 		else if (INPUT_Get_Button(Button2))
@@ -243,6 +251,12 @@ void STATE_QueueState(game_state_t q_state) {
 void STATE_SetState(game_state_t new_state) {
 	if (STATE_state == new_state)
 		return;
+
+	if (new_state == MENU)
+	{
+		menu_pos = 0;
+		menu_entered = HAL_GetTick();
+	}
 
 	if (new_state == QUACK) {
 		if (STATE_state == IDLE || STATE_state == REDRAW_IDLE) {
