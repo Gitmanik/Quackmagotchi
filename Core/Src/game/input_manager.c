@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 
-#define DEBOUNCE_DELAY 20
+#define DEBOUNCE_DELAY 50
 
 uint8_t button1_state = 0;
 unsigned long button1_tmr;
@@ -92,7 +92,7 @@ void INPUT_Clear_Buttons()
 	button1_state = button2_state = button3_state = 0;
 }
 
-uint8_t INPUT_TestButton1()
+uint8_t INPUT_Test_Buttons()
 {
-	return !INPUT_Get_Button(Button1);
+	return !(button1_state || button2_state || button3_state);
 }

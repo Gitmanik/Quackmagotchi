@@ -105,10 +105,8 @@ void STATE_Tick() {
 	}
 
 	if (STATE_state == QUACK) {
-		if (!RENDER_Animate(&pcd8544_handle, ANIM_Quack, 3, 150, INPUT_TestButton1))
-			STATE_QueueState(MENU);
-		else
-			STATE_QueueState(IDLE);
+		RENDER_Animate(&pcd8544_handle, ANIM_Quack, 3, 150, INPUT_Test_Buttons);
+		STATE_QueueState(IDLE);
 	}
 
 	if (STATE_state == REDRAW_IDLE) {
@@ -133,17 +131,11 @@ void STATE_Tick() {
 
 			if (rand() % 2 == 0 || 1)
 			{
-				if (!RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, INPUT_TestButton1))
-				{
-					STATE_QueueState(MENU);
-				}
+				RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, INPUT_Test_Buttons);
 			}
 			else
 			{
-				if (!RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, INPUT_TestButton1))
-				{
-					STATE_QueueState(MENU);
-				}
+				RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, INPUT_Test_Buttons);
 			}
 
 			RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_base);
@@ -171,7 +163,7 @@ void STATE_Tick() {
 
 		PCD8544_UpdateScreen(&pcd8544_handle);
 
-		if (!STATE_Delay(100, INPUT_TestButton1)) {
+		if (!STATE_Delay(100, INPUT_Test_Buttons)) {
 			STATE_QueueState(IDLE);
 		}
 		INPUT_Clear_Buttons();
