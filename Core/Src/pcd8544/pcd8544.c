@@ -26,12 +26,36 @@
 #define PCD8544_SETBIAS         ((uint8_t)0x10)
 #define PCD8544_SETVOP          ((uint8_t)0x80)
 
+static bool SOFT_SPI_Transmit(pcd8544_config_t *handle, uint8_t *values, uint16_t size)
+{
+	for (uint16_t idx = 0; idx < size; idx++)
+	{
+		uint8_t val = values[idx];
+        uint8_t v2 =
+            ((val & 0x01) << 7) |
+            ((val & 0x02) << 5) |
+            ((val & 0x04) << 3) |
+            ((val & 0x08) << 1) |
+            ((val & 0x10) >> 1) |
+            ((val & 0x20) >> 3) |
+            ((val & 0x40) >> 5) |
+            ((val & 0x80) >> 7);
+        val = v2;
+		for (uint8_t bit = 0; bit < 8; bit++)
+		{
+			HAL_GPIO_WritePin(handle->sck_port_handle, handle->sck_pin, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(handle->mosi_port_handle, handle->mosi_pin, ((val & (1<<bit)) ? GPIO_PIN_SET : GPIO_PIN_RESET));
+			HAL_GPIO_WritePin(handle->sck_port_handle, handle->sck_pin, GPIO_PIN_SET);
+		}
+	}
+	return HAL_OK;
+}
+
 static bool PCD8544_WriteSPI(pcd8544_config_t *handle, uint8_t *values, uint16_t size)
 {
-	HAL_GPIO_WritePin(handle->ce_port_handle, handle->ce_pin, GPIO_PIN_RESET);
-	HAL_StatusTypeDef status = HAL_SPI_Transmit(handle->spi_handle, values, size, HAL_MAX_DELAY);
-	HAL_GPIO_WritePin(handle->ce_port_handle, handle->ce_pin, GPIO_PIN_SET);
-	return status == HAL_OK;
+	return SOFT_SPI_Transmit(handle, values, size);
+//	HAL_StatusTypeDef status = HAL_SPI_Transmit(handle->spi_handle, values, size, HAL_MAX_DELAY);
+//	return status == HAL_OK;
 }
 
 static bool PCD8544_WriteData(pcd8544_config_t *handle, uint8_t *data, uint16_t size)
@@ -48,12 +72,10 @@ static bool PCD8544_WriteCommand(pcd8544_config_t *handle, uint8_t command)
 
 bool PCD8544_Init(pcd8544_config_t *handle)
 {
-	assert(handle->spi_handle != NULL);
+	assert(handle->mosi_port_handle != NULL);
 	assert(handle->dc_port_handle != NULL);
 	assert(handle->rst_port_handle != NULL);
-	assert(handle->ce_port_handle != NULL);
-
-	HAL_GPIO_WritePin(handle->ce_port_handle, handle->ce_pin, GPIO_PIN_SET);
+	assert(handle->sck_port_handle != NULL);
 
 	HAL_GPIO_WritePin(handle->rst_port_handle, handle->rst_pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(handle->rst_port_handle, handle->rst_pin, GPIO_PIN_SET);

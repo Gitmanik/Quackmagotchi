@@ -21,10 +21,11 @@ typedef enum {
 
 typedef struct {
 
-	SPI_HandleTypeDef *spi_handle;
+	GPIO_TypeDef *mosi_port_handle;
+	uint16_t mosi_pin;
 
-	GPIO_TypeDef *ce_port_handle;
-	uint16_t ce_pin;
+	GPIO_TypeDef *sck_port_handle;
+	uint16_t sck_pin;
 
 	GPIO_TypeDef *dc_port_handle;
 	uint16_t dc_pin;
