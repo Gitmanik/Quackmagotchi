@@ -27,6 +27,7 @@ extern const unsigned char BITMAP_blink[];
 extern const unsigned char BITMAP_food[];
 extern const unsigned char BITMAP_energy[];
 extern const unsigned char BITMAP_happiness[];
+extern const unsigned char BITMAP_title[];
 
 typedef void (*MENU_OnClick) (pcd8544_config_t*);
 typedef struct {

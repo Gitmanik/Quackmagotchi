@@ -20,12 +20,17 @@
 
 #include "../../Inc/main.h"
 
+#define UPDATE_FOOD_INTERVAL_MS 15000
+#define UPDATE_BATTERY_INTERVAL_MS 2500
+
+
 static queue_t queue;
 static game_state_t STATE_state;
 static uint8_t menu_pos;
-static uint32_t last_idle_anim = 0, last_food = 0, last_bat = 0, menu_entered = 0;
+static uint32_t last_idle_anim_ctr = 0, last_food_ctr = 0, last_bat_ctr = 0, menu_entered_ctr = 0, age_ctr = 0;
 
 int8_t STATE_food, STATE_energy, STATE_happiness; //min: 0, max: 100
+uint32_t STATE_age; //min: 0
 uint32_t battery_volt;
 
 void _STATE_HandleStatistics();
@@ -45,7 +50,7 @@ char menu_glowne_tekst[][MENU_ENTRY_LENGTH] = {
 
 void MENU_OnClick_Nakarm(pcd8544_config_t *lcd) {
 	STATE_AddToStat(&STATE_food, 35);
-	last_idle_anim = HAL_GetTick();
+	last_idle_anim_ctr = HAL_GetTick();
 	STATE_QueueState(IDLE);
 }
 
@@ -79,6 +84,8 @@ uint8_t STATE_Delay(uint32_t Delay, uint8_t (*func) ()) {
 
 		__WFI();
 	}
+
+//	printf("STATE_Delay for %u: %u -> %u, real:%u \n", Delay, tickstart, HAL_GetTick(), HAL_GetTick() - tickstart);
 	return 1;
 }
 
@@ -127,9 +134,9 @@ void STATE_Tick() {
 	}
 
 	if (STATE_state == IDLE) {
-		if (HAL_GetTick() - last_idle_anim > 2000) {
+		if (HAL_GetTick() - last_idle_anim_ctr > 2000) { //todo zwiekszyc
 
-			if (rand() % 2 == 0 || 1)
+			if (rand() % 2 == 0)
 			{
 				RENDER_Animate(&pcd8544_handle, ANIM_Stand, 2, 400, INPUT_Test_Buttons);
 			}
@@ -141,7 +148,7 @@ void STATE_Tick() {
 			RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_base);
 			PCD8544_UpdateScreen(&pcd8544_handle);
 
-			last_idle_anim = HAL_GetTick();
+			last_idle_anim_ctr = HAL_GetTick();
 		}
 
 		if (INPUT_Get_Button(Button1)) {
@@ -188,7 +195,7 @@ void STATE_Tick() {
 			if (menu_pos > 0)
 				menu_pos--;
 		}
-		else if (HAL_GetTick() - menu_entered > 15000)
+		else if (HAL_GetTick() - menu_entered_ctr > 15000)
 			STATE_QueueState(IDLE);
 	}
 }
@@ -198,12 +205,12 @@ void STATE_Tick() {
 void _STATE_HandleStatistics() {
 
 	uint32_t tick = HAL_GetTick();
-	if (tick - last_food > 15000) {
+	if (tick - last_food_ctr > UPDATE_FOOD_INTERVAL_MS) {
 		STATE_AddToStat(&STATE_food, -1);
-		last_food = tick;
+		last_food_ctr = tick;
 	}
 
-	if (tick - last_bat > 3000) {
+	if (tick - last_bat_ctr > UPDATE_BATTERY_INTERVAL_MS) {
 
 		HAL_ADC_Start(&hadc1);
 		HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -213,8 +220,10 @@ void _STATE_HandleStatistics() {
 
 		STATE_energy = map(battery_volt, 3700, 4200, 0, 100);
 
-		last_bat = tick;
+		last_bat_ctr = tick;
 	}
+
+	age_ctr++;
 }
 
 void STATE_AddToStat(int8_t *stat, int8_t val) {
@@ -247,7 +256,7 @@ void STATE_SetState(game_state_t new_state) {
 	if (new_state == MENU)
 	{
 		menu_pos = 0;
-		menu_entered = HAL_GetTick();
+		menu_entered_ctr = HAL_GetTick();
 	}
 
 	if (new_state == QUACK) {
