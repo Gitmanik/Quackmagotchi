@@ -28,6 +28,8 @@ extern const unsigned char BITMAP_food[];
 extern const unsigned char BITMAP_energy[];
 extern const unsigned char BITMAP_happiness[];
 extern const unsigned char BITMAP_title[];
+extern const unsigned char BITMAP_sleep[];
+
 
 typedef void (*MENU_OnClick) (pcd8544_config_t*);
 typedef struct {
@@ -42,5 +44,6 @@ uint8_t RENDER_Animate(pcd8544_config_t* lcd, int* anim, size_t len, uint32_t de
 
 void RENDER_RenderDebugScreen(pcd8544_config_t* lcd);
 void RENDER_RenderMenu(pcd8544_config_t* lcd, menu_t *menu, uint8_t pos);
+void RENDER_RenderIdle(pcd8544_config_t* lcd);
 
 void RENDER_Init();

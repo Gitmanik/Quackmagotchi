@@ -20,9 +20,12 @@
 
 #include "../../Inc/main.h"
 
+#define IDLE_ANIM_INTERVAL_MS 1000
 #define UPDATE_FOOD_INTERVAL_MS 15000
 #define UPDATE_BATTERY_INTERVAL_MS 2500
 
+#define BATTERY_MIN_VOLTAGE 3700
+#define BATTERY_MAX_VOLTAGE 4200
 
 static queue_t queue;
 static game_state_t STATE_state;
@@ -49,6 +52,13 @@ char menu_glowne_tekst[][MENU_ENTRY_LENGTH] = {
 };
 
 void MENU_OnClick_Nakarm(pcd8544_config_t *lcd) {
+
+	PCD8544_ClearBuffer(&pcd8544_handle);
+	RENDER_RenderIdle(&pcd8544_handle);
+	RENDER_Animate(lcd, ANIM_Quack, 3, 200, _STATE_MockTest);
+	RENDER_Animate(lcd, ANIM_Quack, 3, 200, _STATE_MockTest);
+	RENDER_Animate(lcd, ANIM_Quack, 3, 200, _STATE_MockTest);
+
 	STATE_AddToStat(&STATE_food, 35);
 	last_idle_anim_ctr = HAL_GetTick();
 	STATE_QueueState(IDLE);
@@ -85,7 +95,6 @@ uint8_t STATE_Delay(uint32_t Delay, uint8_t (*func) ()) {
 		__WFI();
 	}
 
-//	printf("STATE_Delay for %u: %u -> %u, real:%u \n", Delay, tickstart, HAL_GetTick(), HAL_GetTick() - tickstart);
 	return 1;
 }
 
@@ -118,23 +127,13 @@ void STATE_Tick() {
 
 	if (STATE_state == REDRAW_IDLE) {
 
-		RENDER_DrawStat(&pcd8544_handle, 0, (unsigned char*) &BITMAP_energy,
-				STATE_energy);
-		RENDER_DrawStat(&pcd8544_handle, 1, (unsigned char*) &BITMAP_food,
-				STATE_food);
-		RENDER_DrawStat(&pcd8544_handle, 2, (unsigned char*) &BITMAP_happiness,
-				STATE_happiness);
-		RENDER_DrawStat(&pcd8544_handle, 3, (unsigned char*) &BITMAP_happiness,
-				0);
-
-		RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_base);
-
+		RENDER_RenderIdle(&pcd8544_handle);
 		PCD8544_UpdateScreen(&pcd8544_handle);
 		STATE_QueueState(IDLE);
 	}
 
 	if (STATE_state == IDLE) {
-		if (HAL_GetTick() - last_idle_anim_ctr > 2000) { //todo zwiekszyc
+		if (HAL_GetTick() - last_idle_anim_ctr > IDLE_ANIM_INTERVAL_MS) {
 
 			if (rand() % 2 == 0)
 			{
@@ -145,7 +144,7 @@ void STATE_Tick() {
 				RENDER_Animate(&pcd8544_handle, ANIM_Blink, 1, 100, INPUT_Test_Buttons);
 			}
 
-			RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_base);
+			RENDER_DrawDuck(&pcd8544_handle, (unsigned char*) &BITMAP_sleep);
 			PCD8544_UpdateScreen(&pcd8544_handle);
 
 			last_idle_anim_ctr = HAL_GetTick();
@@ -218,12 +217,18 @@ void _STATE_HandleStatistics() {
 				* 1000) + 1000; //todo: usunac, to jest do testowania wskaznika baterii
 		HAL_ADC_Stop(&hadc1);
 
-		STATE_energy = map(battery_volt, 3700, 4200, 0, 100);
+//		if ()
+
+		STATE_energy = map(battery_volt, BATTERY_MIN_VOLTAGE, BATTERY_MAX_VOLTAGE, 0, 100);
 
 		last_bat_ctr = tick;
 	}
 
-	age_ctr++;
+	if (tick - age_ctr > 1000)
+	{
+		STATE_age++;
+		age_ctr = tick;
+	}
 }
 
 void STATE_AddToStat(int8_t *stat, int8_t val) {
